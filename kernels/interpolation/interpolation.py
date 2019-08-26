@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow.python.framework import ops
 import os
 BASE_DIR = os.path.dirname(__file__)
-interpolate_module=tf.load_op_library(os.path.join(BASE_DIR, 'interpolate_so.so'))
+interpolate_module=tf.load_op_library(os.path.join(BASE_DIR, 'interpolation_so.so'))
 
 def three_nn(xyz1, xyz2):
     '''
