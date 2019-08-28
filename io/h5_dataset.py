@@ -2,6 +2,11 @@
 import tensorflow as tf
 import h5py
 
+# TODO:
+# Dataset 'output' is tightly coupled to the order of items in the HDF5.
+# This MUST be rearranged to be more flexible. Maybe pass in a hashmap with
+# that maps dataset->index? But it also needs to support nested inputs... Hmm...
+
 # Stream batches from each file
 class H5FilesDatasetGenerator:
     def __init__(self, h5_files):
