@@ -50,7 +50,7 @@ def pointnet_sa_module(xyz, points, npoint, radius, nsample, mlp):
 
     # Point Feature Embedding
     for num_out_channel in mlp:
-        new_points = tf.keras.layers.Conv2D(num_out_channel, [1, 1], data_format='channels_last')(new_points)
+        new_points = tf.keras.layers.Conv2D(num_out_channel, [1, 1], data_format='channels_last', activation='relu')(new_points)
 
     # Pooling in Local Regions
     new_points = tf.reduce_max(new_points, axis=[2], keep_dims=True, name='maxpool')
@@ -84,7 +84,7 @@ def pointnet_fp_module(xyz1, xyz2, points1, points2, mlp):
     new_points1 = tf.expand_dims(new_points1, 2)
     
     for num_out_channel in mlp:
-        new_points1 = tf.keras.layers.Conv2D(num_out_channel, [1,1])(new_points1)
+        new_points1 = tf.keras.layers.Conv2D(num_out_channel, [1,1], activation='relu')(new_points1)
     
     new_points1 = tf.squeeze(new_points1, [2]) # B,ndataset1,mlp[-1]
     return new_points1
