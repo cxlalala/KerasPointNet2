@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 import tensorflow as tf
 import h5py
+import numpy as np
 
 # TODO:
 # Dataset 'output' is tightly coupled to the order of items in the HDF5.
@@ -18,13 +19,15 @@ class H5FilesDatasetGenerator:
             self.current_file = h5_filename
             with h5py.File(h5_filename, "r") as h5_file:
                 for batches in zip(*[h5_file[dataset] for dataset in h5_file]):
-                    yield batches
+                    yield (batches[0], np.expand_dims(batches[1], axis=1))
+                    #yield batches
 
 # Get lists of shapes and types for datasets in this h5 file
 def shapes_and_types(filename):
     with h5py.File(filename, "r") as h5_file:
         types = [h5_file[dataset].dtype for dataset in h5_file]
         shapes = [tf.TensorShape(h5_file[dataset].shape[1:]) for dataset in h5_file]
+    shapes[1] = (1024, 1)
     return (shapes, types)
 
 # Return a tensorflow dataset comprising the h5 files in the input list

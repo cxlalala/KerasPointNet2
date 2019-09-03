@@ -20,7 +20,7 @@ def sample_and_group(npoint, radius, nsample, xyz, points):
             (subtracted by seed point XYZ) in local regions
     '''
     new_xyz = gather_point(xyz, farthest_point_sample(npoint, xyz)) # (batch_size, npoint, 3)
-    idx, pts_cnt = query_ball_point(radius, nsample, xyz, new_xyz)
+    idx, _ = query_ball_point(radius, nsample, xyz, new_xyz)
     grouped_xyz = group_point(xyz, idx) # (batch_size, npoint, nsample, 3)
     grouped_xyz -= tf.tile(tf.expand_dims(new_xyz, 2), [1, 1, nsample, 1]) # translation normalization
     if points is not None:
@@ -84,7 +84,7 @@ def pointnet_fp_module(xyz1, xyz2, points1, points2, mlp):
     new_points1 = tf.expand_dims(new_points1, 2)
     
     for num_out_channel in mlp:
-        new_points1 = tf.keras.layers.Conv2D(num_out_channel, [1,1], activation='relu')(new_points1)
+        new_points1 = tf.keras.layers.Conv2D(num_out_channel, [1, 1], data_format='channels_last', activation='relu')(new_points1)
     
     new_points1 = tf.squeeze(new_points1, [2]) # B,ndataset1,mlp[-1]
     return new_points1
