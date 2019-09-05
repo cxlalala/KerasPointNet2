@@ -42,9 +42,30 @@ test_dataset, test_dataset_len = dataset_from_h5_files(test_dirs)
 model = model.get_model(1024, 3, 2)
 optimizer = tf.keras.optimizers.Adam(0.001)
 
+# https://gist.github.com/wassname/ce364fddfc8a025bfab4348cf5de852d
+def weighted_categorical_crossentropy(weights):
+    weights = tf.keras.backend.variable(weights)
+        
+    def loss(y_true, y_pred):
+        # scale predictions so that the class probas of each sample sum to 1
+        y_pred /= tf.keras.backend.sum(y_pred, axis=-1, keepdims=True)
+        # clip to prevent NaN's and Inf's
+        y_pred = tf.keras.backend.clip(y_pred, tf.keras.backend.epsilon(), 1 - tf.keras.backend.epsilon())
+        # calc
+        loss = y_true * tf.keras.backend.log(y_pred) * weights
+        loss = -tf.keras.backend.sum(loss, -1)
+        return loss
+    
+    return loss
+
+loss_fn = weighted_categorical_crossentropy([50.0, 1.0])
+#model.compile(optimizer=optimizer,
+#              loss='sparse_categorical_crossentropy',
+#              metrics=['sparse_categorical_accuracy'])
+
 model.compile(optimizer=optimizer,
-              loss='sparse_categorical_crossentropy',
-              metrics=['sparse_categorical_accuracy'])
+              loss=loss_fn,
+              metrics=['accuracy'])
 
 try:
     model.load_weights(checkpoint_dir)
