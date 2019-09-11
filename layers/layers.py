@@ -53,7 +53,7 @@ def pointnet_sa_module(xyz, points, npoint, radius, nsample, mlp):
         new_points = tf.keras.layers.Conv2D(num_out_channel, [1, 1], data_format='channels_last', activation='relu')(new_points)
 
     # Pooling in Local Regions
-    new_points = tf.reduce_max(new_points, axis=[2], keep_dims=True, name='maxpool')
+    new_points = tf.reduce_max(new_points, axis=[2], keepdims=True, name='maxpool')
     new_points = tf.squeeze(new_points, [2]) # (batch_size, npoints)
 
     return new_xyz, new_points, idx
@@ -71,7 +71,7 @@ def pointnet_fp_module(xyz1, xyz2, points1, points2, mlp):
     '''
     dist, idx = three_nn(xyz1, xyz2)
     dist = tf.maximum(dist, 1e-10)
-    norm = tf.reduce_sum((1.0/dist), axis=2, keep_dims=True)
+    norm = tf.reduce_sum((1.0/dist), axis=2, keepdims=True)
     norm = tf.tile(norm,[1,1,3])
     weight = (1.0 / dist) / norm
     interpolated_points = three_interpolate(points2, idx, weight)
