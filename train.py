@@ -14,15 +14,16 @@ except:
     checkpoint_dir = 'tf_ckpts/best.ckpt'
 
 N_CLASSES = 2
-N_POINTS_PER_SAMPLE = 1024
+N_POINTS_PER_SAMPLE = 2048
 N_CHANNELS = 3
-N_EXTRAS = 0
+N_EXTRAS = 3
 N_EPOCHS = 40
 LEARNING_RATE = 0.001
 
 import tensorflow as tf
 from tensorflow import keras
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import h5py
 import numpy as np
 import model
@@ -58,8 +59,9 @@ train_dataset, train_dataset_len, train_labels = dataset_from_h5_files(train_dir
 test_dataset, test_dataset_len, _ = dataset_from_h5_files(test_dirs)
 
 # Determine class weights from dataset
-#print "Determining class weights..."
+print "Determining class weights..."
 #class_weights = median_frequency_class_weights(train_labels, N_CLASSES)
+class_weights = [0.0765, 1.0]
 
 # Initialize model and optimizer
 print "Building model..."
@@ -67,11 +69,11 @@ model = model.get_model(N_POINTS_PER_SAMPLE, N_CHANNELS, N_CLASSES, N_EXTRAS)
 optimizer = keras.optimizers.Adam(LEARNING_RATE)
 
 # Initialze custom loss function with class weights 
-#loss_fn = weighted_sparse_categorical_crossentropy(class_weights)
+loss_fn = weighted_sparse_categorical_crossentropy(class_weights)
 
 model.compile(optimizer=optimizer,
-              loss='sparse_categorical_crossentropy',
-              #loss=loss_fn,
+              #loss='sparse_categorical_crossentropy',
+              loss=loss_fn,
               metrics=['sparse_categorical_accuracy'])
 
 # Attempt to load a checkpoint
