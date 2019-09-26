@@ -2,10 +2,11 @@ from tensorflow import keras
 import sys
 sys.path.append('./layers'); from layers import *
 
-def get_model(n_points, n_channels, n_classes):
-    input_layer = keras.layers.Input(shape=(n_points, n_channels))
-    l0_xyz = input_layer
-    l0_points = None
+def get_model(n_points, n_channels, n_classes, n_extras):
+    input_xyz = keras.layers.Input(shape=(n_points, n_channels))
+    input_extras = keras.layers.Input(shape=(n_points, n_extras))
+    l0_xyz = input_xyz
+    l0_points = input_extras
     l1_xyz, l1_points, l1_indices = pointnet_sa_module(l0_xyz, l0_points, npoint=1024, radius=0.1, nsample=32, mlp=[32, 32, 64])
     l2_xyz, l2_points, l2_indices = pointnet_sa_module(l1_xyz, l1_points, npoint=256, radius=0.2, nsample=32, mlp=[64, 64, 128])
     l3_xyz, l3_points, l3_indices = pointnet_sa_module(l2_xyz, l2_points, npoint=64, radius=0.4, nsample=32, mlp=[128, 128, 256])
@@ -20,4 +21,4 @@ def get_model(n_points, n_channels, n_classes):
     net = keras.layers.Conv1D(n_classes, 1, activation=None)(net)
     net = keras.layers.Softmax()(net)
 
-    return keras.models.Model(inputs=input_layer, outputs=net)
+    return keras.models.Model(inputs=(input_xyz, input_extras), outputs=net)

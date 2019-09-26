@@ -16,6 +16,7 @@ except:
 N_CLASSES = 2
 N_POINTS_PER_SAMPLE = 1024
 N_CHANNELS = 3
+N_EXTRAS = 0
 N_EPOCHS = 40
 LEARNING_RATE = 0.001
 
@@ -38,14 +39,17 @@ tf.enable_eager_execution()
 # Set up the dataset generators 
 print "Setting up datasets..."
 def dataset_from_h5_files(filenames):
-    data_generator = H5FilesDatasetGenerator(filenames, "data")
+    point_generator = H5FilesDatasetGenerator(filenames, "data")
     label_generator = H5FilesDatasetGenerator(filenames, "label")
+    extra_generator = H5FilesDatasetGenerator(filenames, "extra")
 
-    data_dataset = tf.data.Dataset.from_generator(data_generator, data_generator.dtype, data_generator.shape)
+    point_dataset = tf.data.Dataset.from_generator(point_generator, point_generator.dtype, point_generator.shape)
     label_dataset = tf.data.Dataset.from_generator(label_generator, label_generator.dtype, label_generator.shape).map(lambda data: tf.expand_dims(data, axis=1))
-    combined_dataset = tf.data.Dataset.zip((data_dataset, label_dataset)).shuffle(data_generator.total_samples).batch(1).repeat()
+    extra_dataset = tf.data.Dataset.from_generator(extra_generator, extra_generator.dtype, extra_generator.shape)
+    combined_dataset = tf.data.Dataset.zip(((point_dataset, extra_dataset), label_dataset))
+    combined_dataset = combined_dataset.shuffle(2000).batch(1).repeat()
 
-    return combined_dataset, data_generator.total_samples, label_generator
+    return combined_dataset, point_generator.total_samples, label_generator
 
 train_dirs = open_file_list(input_dir, "train_files.txt")
 test_dirs = open_file_list(input_dir, "test_files.txt")
@@ -54,20 +58,20 @@ train_dataset, train_dataset_len, train_labels = dataset_from_h5_files(train_dir
 test_dataset, test_dataset_len, _ = dataset_from_h5_files(test_dirs)
 
 # Determine class weights from dataset
-print "Determining class weights..."
-class_weights = median_frequency_class_weights(train_labels, N_CLASSES)
+#print "Determining class weights..."
+#class_weights = median_frequency_class_weights(train_labels, N_CLASSES)
 
 # Initialize model and optimizer
 print "Building model..."
-model = model.get_model(N_POINTS_PER_SAMPLE, N_CHANNELS, N_CLASSES)
+model = model.get_model(N_POINTS_PER_SAMPLE, N_CHANNELS, N_CLASSES, N_EXTRAS)
 optimizer = keras.optimizers.Adam(LEARNING_RATE)
 
 # Initialze custom loss function with class weights 
-loss_fn = weighted_sparse_categorical_crossentropy(class_weights)
+#loss_fn = weighted_sparse_categorical_crossentropy(class_weights)
 
 model.compile(optimizer=optimizer,
-              #loss='sparse_categorical_crossentropy',
-              loss=loss_fn,
+              loss='sparse_categorical_crossentropy',
+              #loss=loss_fn,
               metrics=['sparse_categorical_accuracy'])
 
 # Attempt to load a checkpoint
