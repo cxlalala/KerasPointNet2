@@ -22,7 +22,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 sys.path.append('./io'); 
 from io_utils import *
 
-model = model.get_model(2048, 3, 2, 3)
+model = model.get_model(2048, 3, 38, 19)
 
 test_dirs = open_file_list(input_dir, "test_files.txt")
 

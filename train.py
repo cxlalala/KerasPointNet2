@@ -13,12 +13,12 @@ try:
 except:
     checkpoint_dir = 'tf_ckpts/best.ckpt'
 
-N_CLASSES = 2
+N_CLASSES = 38
 N_POINTS_PER_SAMPLE = 2048
 N_CHANNELS = 3
-N_EXTRAS = 3
-N_EPOCHS = 40
-LEARNING_RATE = 0.001
+N_EXTRAS = 19
+N_EPOCHS = 80
+LEARNING_RATE = 0.0001
 
 import tensorflow as tf
 from tensorflow import keras
@@ -48,7 +48,7 @@ def dataset_from_h5_files(filenames):
     label_dataset = tf.data.Dataset.from_generator(label_generator, label_generator.dtype, label_generator.shape).map(lambda data: tf.expand_dims(data, axis=1))
     extra_dataset = tf.data.Dataset.from_generator(extra_generator, extra_generator.dtype, extra_generator.shape)
     combined_dataset = tf.data.Dataset.zip(((point_dataset, extra_dataset), label_dataset))
-    combined_dataset = combined_dataset.shuffle(2000).batch(1).repeat()
+    combined_dataset = combined_dataset.shuffle(8000).batch(1).repeat()
 
     return combined_dataset, point_generator.total_samples, label_generator
 
@@ -60,8 +60,9 @@ test_dataset, test_dataset_len, _ = dataset_from_h5_files(test_dirs)
 
 # Determine class weights from dataset
 print "Determining class weights..."
-#class_weights = median_frequency_class_weights(train_labels, N_CLASSES)
-class_weights = [0.0765, 1.0]
+#class_weights = median_frequency_class_weights(train_labels, N_CLASSES, 6000)
+class_weights = [1.0 for _ in range(N_CLASSES)]
+class_weights[0] = 0.02
 
 # Initialize model and optimizer
 print "Building model..."
@@ -69,7 +70,7 @@ model = model.get_model(N_POINTS_PER_SAMPLE, N_CHANNELS, N_CLASSES, N_EXTRAS)
 optimizer = keras.optimizers.Adam(LEARNING_RATE)
 
 # Initialze custom loss function with class weights 
-loss_fn = weighted_sparse_categorical_crossentropy(class_weights)
+loss_fn = weighted_sparse_categorical_crossentropy(class_weights, N_CLASSES)
 
 model.compile(optimizer=optimizer,
               #loss='sparse_categorical_crossentropy',
@@ -93,5 +94,5 @@ model.fit_generator(
     validation_data=test_dataset,
     validation_steps=test_dataset_len,
     validation_freq=1,
-    epochs=N_EPOCHS,
+    epochs=80,
     callbacks=[checkpoint_callback])

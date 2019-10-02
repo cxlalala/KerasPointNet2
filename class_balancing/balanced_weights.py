@@ -1,10 +1,10 @@
 #!/usr/bin/env python2
 import numpy as np
 
-def median_frequency_class_weights(labels_generator, n_classes):
+def median_frequency_class_weights(labels_generator, n_classes, max_samples):
     shape_counts = np.empty(n_classes)
     
-    for label_sample in labels_generator():
+    for label_sample, _ in zip(labels_generator(), range(max_samples)):
         shape_counts = np.vstack((shape_counts, np.bincount(label_sample, minlength=n_classes)))
     
     medians = np.median(shape_counts, axis=0)
