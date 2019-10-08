@@ -2,8 +2,8 @@ from tensorflow import keras
 import sys
 sys.path.append('./layers'); from layers import *
 
-def get_model(n_points, n_channels, n_classes, n_extras):
-    input_xyz = keras.layers.Input(shape=(n_points, n_channels))
+def get_model(n_points, n_classes, n_extras):
+    input_xyz = keras.layers.Input(shape=(n_points, 3))
     input_extras = keras.layers.Input(shape=(n_points, n_extras))
     l0_xyz = input_xyz
     l0_points = input_extras

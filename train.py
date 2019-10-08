@@ -13,12 +13,7 @@ try:
 except:
     checkpoint_dir = 'tf_ckpts/best.ckpt'
 
-N_CLASSES = 38
-N_POINTS_PER_SAMPLE = 2048
-N_CHANNELS = 3
-N_EXTRAS = 19
-N_EPOCHS = 300
-LEARNING_RATE = 0.0001
+from settings import *
 
 import tensorflow as tf
 from tensorflow import keras
@@ -70,7 +65,7 @@ test_dataset, test_dataset_len, _ = dataset_from_h5_files(test_dirs)
 
 # Initialize model and optimizer
 print "Building model..."
-model = model.get_model(N_POINTS_PER_SAMPLE, N_CHANNELS, N_CLASSES, N_EXTRAS)
+model = model.get_model(N_POINTS_PER_SAMPLE, N_CLASSES, N_EXTRAS)
 optimizer = keras.optimizers.Adam(LEARNING_RATE)
 
 model.compile(optimizer=optimizer,
