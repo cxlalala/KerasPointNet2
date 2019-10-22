@@ -4,6 +4,7 @@ sys.path.append('./kernels/grouping'); from grouping import *
 sys.path.append('./kernels/interpolation'); from interpolation import *
 sys.path.append('./kernels/sampling'); from sampling import *
 
+
 def sample_and_group(npoint, radius, nsample, xyz, points):
     '''
     Input:
@@ -30,6 +31,7 @@ def sample_and_group(npoint, radius, nsample, xyz, points):
         new_points = grouped_xyz
 
     return new_xyz, new_points, idx, grouped_xyz
+
 
 def pointnet_sa_module(xyz, points, npoint, radius, nsample, mlp):
     ''' PointNet Set Abstraction (SA) Module

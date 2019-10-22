@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 import sys
 
-# Check arguments
+# Check arguments (Before imports so we don't have to freaking wait)
 try:
     input_dir = sys.argv[1]
 except:
@@ -37,13 +37,12 @@ print "Setting up datasets..."
 def dataset_from_h5_files(filenames):
     point_generator = H5FilesDatasetGenerator(filenames, "data")
     label_generator = H5FilesDatasetGenerator(filenames, "label")
-    extra_generator = H5FilesDatasetGenerator(filenames, "extra")
 
     point_dataset = tf.data.Dataset.from_generator(point_generator, point_generator.dtype, point_generator.shape)
     label_dataset = tf.data.Dataset.from_generator(label_generator, label_generator.dtype, label_generator.shape).map(lambda data: tf.expand_dims(data, axis=1))
-    extra_dataset = tf.data.Dataset.from_generator(extra_generator, extra_generator.dtype, extra_generator.shape)
-    combined_dataset = tf.data.Dataset.zip(((point_dataset, extra_dataset), label_dataset))
+    combined_dataset = tf.data.Dataset.zip((point_dataset, label_dataset))
     combined_dataset = combined_dataset.shuffle(8000).batch(1).repeat()
+    combined_dataset = combined_dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
 
     return combined_dataset, point_generator.total_samples, label_generator
 

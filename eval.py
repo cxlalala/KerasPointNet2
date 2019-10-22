@@ -35,7 +35,8 @@ for input_file in test_dirs:
     with h5py.File(input_file, 'r') as input_file, h5py.File(output_file, 'w') as output_file:
         output_file.create_dataset("data", data=input_file["data"])
         output_file.create_dataset("label", data=input_file["label"])
-        output_file.create_dataset("extra", data=input_file["extra"])
-        predictions = model.predict((input_file["data"], input_file["extra"]), verbose=1)
+        #output_file.create_dataset("extra", data=input_file["extra"])
+        #predictions = model.predict((input_file["data"], input_file["extra"]), verbose=1)
+        predictions = model.predict(input_file["data"], verbose=1)
         predictions_sparse = np.argmax(predictions, axis=2)
         output_file.create_dataset("prediction", data=predictions_sparse)
