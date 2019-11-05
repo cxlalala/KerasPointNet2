@@ -1,17 +1,22 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 import sys
 
 # Check arguments (Before imports so we don't have to freaking wait)
-try:
+if len(sys.argv) > 1:
     input_dir = sys.argv[1]
-except:
-    print "Usage: {} <dataset dir> <checkpoint_dir>".format(sys.argv[0])
+else:
+    print("Usage: {} <dataset dir> <checkpoint_dir> <model_save_dir.h5>".format(sys.argv[0]))
     exit(-1)
 
-try:
+if len(sys.argv) > 2:
     checkpoint_dir = sys.argv[2]
-except:
+else:
     checkpoint_dir = 'tf_ckpts/best.ckpt'
+
+if len(sys.argv) > 3:
+    model_save_dir = sys.argv[3]
+else:
+    model_save_dir = 'saved_model'
 
 from settings import *
 
@@ -26,14 +31,9 @@ sys.path.append('./io');
 from h5_dataset import H5FilesDatasetGenerator
 from io_utils import *
 sys.path.append('./class_balancing'); 
-from balanced_loss import weighted_sparse_categorical_crossentropy
-from balanced_weights import median_frequency_class_weights
-
-# Act like Tensorflow V2.0
-tf.enable_eager_execution()
 
 # Set up the dataset generators 
-print "Setting up datasets..."
+print("Setting up datasets...")
 def dataset_from_h5_files(filenames):
     point_generator = H5FilesDatasetGenerator(filenames, "data")
     label_generator = H5FilesDatasetGenerator(filenames, "label")
@@ -52,42 +52,34 @@ test_dirs = open_file_list(input_dir, "test_files.txt")
 train_dataset, train_dataset_len, train_labels = dataset_from_h5_files(train_dirs)
 test_dataset, test_dataset_len, _ = dataset_from_h5_files(test_dirs)
 
-# Determine class weights from dataset
-#print "Determining class weights..."
-#class_weights = median_frequency_class_weights(train_labels, N_CLASSES, 6000)
-
-#class_weights = [1.0 for _ in range(N_CLASSES)]
-#class_weights[0] = 0.02
-
-# Initialze custom loss function with class weights 
-#loss_fn = weighted_sparse_categorical_crossentropy(class_weights, N_CLASSES)
-
 # Initialize model and optimizer
-print "Building model..."
+print("Building model...")
 model = model.get_model(N_POINTS_PER_SAMPLE, N_CLASSES, N_EXTRAS)
 optimizer = keras.optimizers.Adam(LEARNING_RATE)
 
 model.compile(optimizer=optimizer,
               loss='sparse_categorical_crossentropy',
-              #loss=loss_fn,
               metrics=['sparse_categorical_accuracy'])
 
-# Attempt to load a checkpoint
-try:
+# Attempt to load a checkpoint TODO: Switch this to an if statement
+try: 
     model.load_weights(checkpoint_dir)
-    print "Loaded checkpoint: {}".format(checkpoint_dir)
+    print("Loaded checkpoint: {}".format(checkpoint_dir))
 except:
-    print "Could not find checkpoint {}, starting from scratch.".format(checkpoint_dir)
+    print("Could not find checkpoint {}, starting from scratch.".format(checkpoint_dir))
 
-# Checkpoint for saving 
+# Checkpoint callback for saving 
 checkpoint_callback = keras.callbacks.ModelCheckpoint(checkpoint_dir, save_weights_only=True, verbose=0, save_best_only=True)
 
-# Actually fit the model
-model.fit_generator(
-    train_dataset,
-    steps_per_epoch=train_dataset_len,
-    validation_data=test_dataset,
-    validation_steps=test_dataset_len,
-    validation_freq=1,
-    epochs=N_EPOCHS,
-    callbacks=[checkpoint_callback])
+# Fit the model
+#model.fit_generator(
+#    train_dataset,
+#    steps_per_epoch=train_dataset_len,
+#    validation_data=test_dataset,
+#    validation_steps=test_dataset_len,
+#    validation_freq=1,
+#    epochs=N_EPOCHS,
+#    callbacks=[checkpoint_callback])
+
+print("Saving model to {}".format(model_save_dir))
+model.save(model_save_dir, save_format='tf')

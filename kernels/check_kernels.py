@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 import sys
 sys.path.append('./interpolation'); from interpolation import *
 sys.path.append('./grouping'); from grouping import *

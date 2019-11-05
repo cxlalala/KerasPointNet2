@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 import numpy as np
 
 def median_frequency_class_weights(labels_generator, n_classes, max_samples):
@@ -22,4 +22,4 @@ if __name__ == "__main__":
     N_CLASSES = 2
     train_dirs = open_file_list("../datasets/net_input/", "train_files.txt")
     labels_generator = H5FilesDatasetGenerator(train_dirs, "label")
-    print median_frequency_class_weights(labels_generator, N_CLASSES)
+    print(median_frequency_class_weights(labels_generator, N_CLASSES))
