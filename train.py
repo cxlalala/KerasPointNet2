@@ -32,6 +32,8 @@ from h5_dataset import H5FilesDatasetGenerator
 from io_utils import *
 sys.path.append('./class_balancing'); 
 
+tf.compat.v1.enable_eager_execution()
+
 # Set up the dataset generators 
 print("Setting up datasets...")
 def dataset_from_h5_files(filenames):
@@ -72,14 +74,14 @@ except:
 checkpoint_callback = keras.callbacks.ModelCheckpoint(checkpoint_dir, save_weights_only=True, verbose=0, save_best_only=True)
 
 # Fit the model
-#model.fit_generator(
-#    train_dataset,
-#    steps_per_epoch=train_dataset_len,
-#    validation_data=test_dataset,
-#    validation_steps=test_dataset_len,
-#    validation_freq=1,
-#    epochs=N_EPOCHS,
-#    callbacks=[checkpoint_callback])
+model.fit_generator(
+    train_dataset,
+    steps_per_epoch=train_dataset_len,
+    validation_data=test_dataset,
+    validation_steps=test_dataset_len,
+    validation_freq=1,
+    epochs=N_EPOCHS,
+    callbacks=[checkpoint_callback])
 
 print("Saving model to {}".format(model_save_dir))
 model.save(model_save_dir, save_format='tf')
