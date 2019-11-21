@@ -5,7 +5,7 @@ import sys
 if len(sys.argv) > 1:
     input_dir = sys.argv[1]
 else:
-    print("Usage: {} <dataset dir> <checkpoint_dir> <model_save_dir.h5>".format(sys.argv[0]))
+    print("Usage: {} <dataset dir> <checkpoint_dir> <model_save_dir>".format(sys.argv[0]))
     exit(-1)
 
 if len(sys.argv) > 2:
@@ -18,7 +18,10 @@ if len(sys.argv) > 3:
 else:
     model_save_dir = 'saved_model'
 
-from settings import *
+N_CLASSES = 2
+N_POINTS_PER_SAMPLE = 2048
+N_EPOCHS = 40
+LEARNING_RATE = 0.0001
 
 import tensorflow as tf
 from tensorflow import keras

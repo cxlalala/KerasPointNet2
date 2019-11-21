@@ -1,8 +1,8 @@
 import sys
 import tensorflow as tf
-sys.path.append('./kernels/grouping'); from grouping import *
-sys.path.append('./kernels/interpolation'); from interpolation import *
-sys.path.append('./kernels/sampling'); from sampling import *
+from custom_ops.grouping.grouping import *
+from custom_ops.sampling.sampling import *
+from custom_ops.interpolation.interpolation import *
 
 
 def sample_and_group(npoint, radius, nsample, xyz, points):

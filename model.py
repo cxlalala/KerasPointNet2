@@ -1,6 +1,6 @@
 from tensorflow import keras
 import sys
-sys.path.append('./layers'); from layers import *
+from custom_ops.layers import *
 
 def get_model(n_points, n_classes):
     input_xyz = keras.layers.Input(shape=(n_points, 3))

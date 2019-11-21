@@ -13,10 +13,9 @@ import model
 import h5py
 import numpy as np
 import os
-#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 sys.path.append('./io'); 
 from io_utils import *
-from settings import *
 import tensorflow as tf 
 
 model = tf.keras.models.load_model(model_dir)
