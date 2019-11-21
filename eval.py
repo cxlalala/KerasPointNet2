@@ -2,11 +2,14 @@
 import sys
 
 try:
-    input_dir = sys.argv[1]
-    output_dir = sys.argv[2]
-    model_dir = sys.argv[3]
+    top_dir = sys.argv[1]
+    bottom_dir = sys.argv[2]
+    left_dir = sys.argv[3]
+    right_dir = sys.argv[4]
+    output_dir = sys.argv[5]
+    model_dir = sys.argv[6]
 except:
-    print("Usage: {} <input_dir> <output_dir> <model_dir>".format(sys.argv[0]))
+    print("Usage: {} <top> <bottom> <left> <right> <output_dir> <model_dir>".format(sys.argv[0]))
     exit(-1)
 
 import model
@@ -14,19 +17,18 @@ import h5py
 import numpy as np
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
-from io_utils.misc import open_file_list
+from io_utils.depthmap_dataset import yield_sampled_chunks
 import tensorflow as tf 
 
 model = tf.keras.models.load_model(model_dir)
 
-test_dirs = open_file_list(input_dir, "test_files.txt")
+output_file = os.path.join(output_dir, "{}_output.h5".format("13296"))
 
-for input_file in test_dirs:
-    output_file = os.path.join(output_dir, "{}_output.h5".format(os.path.splitext(os.path.basename(input_file))[0]))
-    print("{}:".format(output_file))
-    with h5py.File(input_file, 'r') as input_file, h5py.File(output_file, 'w') as output_file:
-        output_file.create_dataset("data", data=input_file["data"])
-        output_file.create_dataset("label", data=input_file["label"])
-        predictions = model.predict(input_file["data"], verbose=1)
-        predictions_sparse = np.argmax(predictions, axis=2)
-        output_file.create_dataset("prediction", data=predictions_sparse)
+chunks = iter(yield_sampled_chunks(top_dir, bottom_dir, left_dir, right_dir, 10, 2048))
+
+with h5py.File(output_file, 'w') as output_file:
+    data = np.array(list(chunks)) / 18000.0
+    output_file.create_dataset("data", data=data)
+    predictions = model.predict(data, verbose=1)
+    predictions_sparse = np.argmax(predictions, axis=2)
+    output_file.create_dataset("prediction", data=predictions_sparse)
