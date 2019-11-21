@@ -30,10 +30,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import h5py
 import numpy as np
 import model
-sys.path.append('./io'); 
-from h5_dataset import H5FilesDatasetGenerator
-from io_utils import *
-sys.path.append('./class_balancing'); 
+from io_utils.h5_dataset import H5FilesDatasetGenerator
+from io_utils.misc import open_file_list
 
 tf.compat.v1.enable_eager_execution()
 
