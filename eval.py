@@ -4,21 +4,16 @@ import sys
 try:
     input_dir = sys.argv[1]
     output_dir = sys.argv[2]
+    model_dir = sys.argv[3]
 except:
     print("Usage: {} <input_dir> <output_dir> <model_dir>".format(sys.argv[0]))
     exit(-1)
-
-try:
-    model_dir = sys.argv[3]
-except:
-    model_dir = 'tf_ckpts/best.ckpt'
-    print("Checkpoint dir not specified, using {} by default".format(model_dir))
 
 import model
 import h5py
 import numpy as np
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 sys.path.append('./io'); 
 from io_utils import *
 from settings import *

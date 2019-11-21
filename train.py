@@ -56,7 +56,7 @@ test_dataset, test_dataset_len, _ = dataset_from_h5_files(test_dirs)
 
 # Initialize model and optimizer
 print("Building model...")
-model = model.get_model(N_POINTS_PER_SAMPLE, N_CLASSES, N_EXTRAS)
+model = model.get_model(N_POINTS_PER_SAMPLE, N_CLASSES)
 optimizer = keras.optimizers.Adam(LEARNING_RATE)
 
 model.compile(optimizer=optimizer,

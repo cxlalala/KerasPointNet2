@@ -2,9 +2,8 @@ from tensorflow import keras
 import sys
 sys.path.append('./layers'); from layers import *
 
-def get_model(n_points, n_classes, n_extras):
+def get_model(n_points, n_classes):
     input_xyz = keras.layers.Input(shape=(n_points, 3))
-    input_extras = keras.layers.Input(shape=n_points)
     l0_xyz = input_xyz
     l0_points = None
     l1_xyz, l1_points, l1_indices = pointnet_sa_module(l0_xyz, l0_points, npoint=1024, radius=0.1, nsample=32, mlp=[32, 32, 64])
