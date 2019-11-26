@@ -1,3 +1,4 @@
 *.pyc
 tf_ckpts/
 saved_model/
+logs/

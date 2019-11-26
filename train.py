@@ -30,6 +30,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import h5py
 import numpy as np
 import model
+from datetime import datetime
 from io_utils.h5_dataset import H5FilesDatasetGenerator
 from io_utils.misc import open_file_list
 
@@ -74,15 +75,20 @@ except:
 # Checkpoint callback for saving 
 checkpoint_callback = keras.callbacks.ModelCheckpoint(checkpoint_dir, save_weights_only=True, verbose=0, save_best_only=True)
 
+# Tensorboard callback
+log_dir="logs/profile/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, profile_batch = 2, update_freq=10)
+
 # Fit the model
 model.fit_generator(
     train_dataset,
-    steps_per_epoch=train_dataset_len,
+    steps_per_epoch=train_dataset_len / 100,
     validation_data=test_dataset,
-    validation_steps=test_dataset_len,
+    validation_steps=test_dataset_len / 100,
     validation_freq=1,
-    epochs=N_EPOCHS,
-    callbacks=[checkpoint_callback])
+    #epochs=N_EPOCHS,
+    epochs=1,
+    callbacks=[checkpoint_callback, tensorboard_callback])
 
-print("Saving model to {}".format(model_save_dir))
-model.save(model_save_dir, save_format='tf')
+#print("Saving model to {}".format(model_save_dir))
+#model.save(model_save_dir, save_format='tf')

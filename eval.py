@@ -24,7 +24,7 @@ model = tf.keras.models.load_model(model_dir)
 
 output_file = os.path.join(output_dir, "{}_output.h5".format("13296"))
 
-chunks = iter(yield_sampled_chunks(top_dir, bottom_dir, left_dir, right_dir, 10, 2048))
+chunks = iter(yield_sampled_chunks(top_dir, bottom_dir, left_dir, right_dir, 50, 2048))
 
 with h5py.File(output_file, 'w') as output_file:
     data = np.array(list(chunks)) / 18000.0
