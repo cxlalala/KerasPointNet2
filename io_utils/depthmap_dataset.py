@@ -57,17 +57,15 @@ def _row_to_3d(row, fov_start, fov_step, fov_start_idx, fov_end_idx, z, orientat
 
     # Concatenate the values from each array depthwise (based on orientation)
     if orientation:
-        points = np.dstack((step_values, row, z_values))[0]
+        return np.dstack((step_values, row, z_values))[0]
     else:
-        points = np.dstack((row, step_values, z_values))[0]
-
-    return points
+        return np.dstack((row, step_values, z_values))[0]
 
 
-def yield_sampled_chunks(top_path, bottom_path, left_path, right_path, n_rows_per_chunk, n_points_per_chunk):
+def yield_sampled_chunks(top_path, bottom_path, left_path, right_path, n_rows_per_chunk, n_points_per_chunk, downscale):
     """
-    Provided a path for each depthmap, yield a sub-pointcloud consisting of 
-    `n_rows_per_chunk `rows from each face with a randomly-sampled for a total of n_points_per_chunk points.
+    Provided a path for each depthmap, yield a sub-pointclouds ("chunks") consisting of 
+    `n_rows_per_chunk` rows from all faces randomly-sampled for a total of `n_points_per_chunk` points.
     """
     bottom_face = _yield_depthmap_rows(bottom_path)
     top_face = _yield_depthmap_rows(top_path)
@@ -117,9 +115,9 @@ def yield_sampled_chunks(top_path, bottom_path, left_path, right_path, n_rows_pe
 
             # Randomly sample `n_points_per_chunk` from the cloud and yield it
             if len(cloud) != 0:
-                #yield cloud
+                #yield cloud / downscale
                 choices = cloud[np.random.choice(len(cloud), n_points_per_chunk)]
-                yield choices
+                yield choices / downscale
 
     # Stop yielding values when any of the faces run out of rows
     except StopIteration:

@@ -34,8 +34,6 @@ from datetime import datetime
 from io_utils.h5_dataset import H5FilesDatasetGenerator
 from io_utils.misc import open_file_list
 
-tf.compat.v1.enable_eager_execution()
-
 # Set up the dataset generators 
 print("Setting up datasets...")
 def dataset_from_h5_files(filenames):
@@ -43,8 +41,12 @@ def dataset_from_h5_files(filenames):
     label_generator = H5FilesDatasetGenerator(filenames, "label")
 
     point_dataset = tf.data.Dataset.from_generator(point_generator, point_generator.dtype, point_generator.shape)
-    label_dataset = tf.data.Dataset.from_generator(label_generator, label_generator.dtype, label_generator.shape).map(lambda data: tf.expand_dims(data, axis=1))
+    label_dataset = tf.data.Dataset.from_generator(label_generator, label_generator.dtype, label_generator.shape)
+
+    label_dataset = label_dataset.map(lambda data: tf.expand_dims(data, axis=1))
+
     combined_dataset = tf.data.Dataset.zip((point_dataset, label_dataset))
+    combined_dataset = combined_dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
     combined_dataset = combined_dataset.shuffle(8000).batch(1).repeat()
     combined_dataset = combined_dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
 
@@ -82,12 +84,11 @@ tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, profile_b
 # Fit the model
 model.fit_generator(
     train_dataset,
-    steps_per_epoch=train_dataset_len / 100,
+    steps_per_epoch=train_dataset_len,
     validation_data=test_dataset,
-    validation_steps=test_dataset_len / 100,
+    validation_steps=test_dataset_len,
     validation_freq=1,
-    #epochs=N_EPOCHS,
-    epochs=1,
+    epochs=N_EPOCHS,
     callbacks=[checkpoint_callback, tensorboard_callback])
 
 #print("Saving model to {}".format(model_save_dir))
