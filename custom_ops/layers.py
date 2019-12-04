@@ -71,7 +71,8 @@ def pointnet_fp_module(xyz1, xyz2, points1, points2, mlp):
         Return:
             new_points: (batch_size, ndataset1, mlp[-1]) TF tensor
     '''
-    dist, idx = three_nn(xyz1, xyz2)
+    #dist, idx = three_nn(xyz1, xyz2)
+    dist, idx = three_nn_gpu(xyz1, xyz2)
     dist = tf.maximum(dist, 1e-10)
     norm = tf.reduce_sum((1.0/dist), axis=2, keepdims=True)
     norm = tf.tile(norm,[1,1,3])

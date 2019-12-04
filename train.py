@@ -47,7 +47,7 @@ def dataset_from_h5_files(filenames):
 
     combined_dataset = tf.data.Dataset.zip((point_dataset, label_dataset))
     combined_dataset = combined_dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
-    combined_dataset = combined_dataset.shuffle(8000).batch(1).repeat()
+    combined_dataset = combined_dataset.shuffle(3000).batch(1).repeat()
     combined_dataset = combined_dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
 
     return combined_dataset, point_generator.total_samples, label_generator
