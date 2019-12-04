@@ -30,10 +30,9 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import h5py
 import numpy as np
 import model
+from datetime import datetime
 from io_utils.h5_dataset import H5FilesDatasetGenerator
 from io_utils.misc import open_file_list
-
-tf.compat.v1.enable_eager_execution()
 
 # Set up the dataset generators 
 print("Setting up datasets...")
@@ -42,9 +41,13 @@ def dataset_from_h5_files(filenames):
     label_generator = H5FilesDatasetGenerator(filenames, "label")
 
     point_dataset = tf.data.Dataset.from_generator(point_generator, point_generator.dtype, point_generator.shape)
-    label_dataset = tf.data.Dataset.from_generator(label_generator, label_generator.dtype, label_generator.shape).map(lambda data: tf.expand_dims(data, axis=1))
+    label_dataset = tf.data.Dataset.from_generator(label_generator, label_generator.dtype, label_generator.shape)
+
+    label_dataset = label_dataset.map(lambda data: tf.expand_dims(data, axis=1))
+
     combined_dataset = tf.data.Dataset.zip((point_dataset, label_dataset))
-    combined_dataset = combined_dataset.shuffle(8000).batch(1).repeat()
+    combined_dataset = combined_dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+    combined_dataset = combined_dataset.shuffle(3000).batch(1).repeat()
     combined_dataset = combined_dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
 
     return combined_dataset, point_generator.total_samples, label_generator
@@ -74,6 +77,10 @@ except:
 # Checkpoint callback for saving 
 checkpoint_callback = keras.callbacks.ModelCheckpoint(checkpoint_dir, save_weights_only=True, verbose=0, save_best_only=True)
 
+# Tensorboard callback
+log_dir="logs/profile/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, profile_batch = 2, update_freq=10)
+
 # Fit the model
 model.fit_generator(
     train_dataset,
@@ -82,7 +89,7 @@ model.fit_generator(
     validation_steps=test_dataset_len,
     validation_freq=1,
     epochs=N_EPOCHS,
-    callbacks=[checkpoint_callback])
+    callbacks=[checkpoint_callback, tensorboard_callback])
 
-print("Saving model to {}".format(model_save_dir))
-model.save(model_save_dir, save_format='tf')
+#print("Saving model to {}".format(model_save_dir))
+#model.save(model_save_dir, save_format='tf')

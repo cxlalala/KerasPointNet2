@@ -9,10 +9,10 @@ CXX="g++"
 
 while read -r dir; do
     pushd $dir
-    source ./compile.sh
+    source ./compile.sh &
     popd
 done << EOF
 ./sampling/
-./interpolation/
 ./grouping
+./interpolation/
 EOF

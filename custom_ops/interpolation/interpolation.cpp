@@ -7,9 +7,21 @@
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/shape_inference.h"
 #include "tensorflow/core/framework/common_shape_fns.h"
+#include <cuda_runtime.h>
 using namespace tensorflow;
 
 REGISTER_OP("ThreeNN")
+    .Input("xyz1: float32")
+    .Input("xyz2: float32")
+    .Output("dist: float32")
+    .Output("idx: int32")
+    .SetShapeFn([](::tensorflow::shape_inference::InferenceContext* c) {
+        c->set_output(0, c->input(0));
+        c->set_output(1, c->input(0));
+        return Status::OK();
+    });
+
+REGISTER_OP("ThreeNNGPU")
     .Input("xyz1: float32")
     .Input("xyz2: float32")
     .Output("dist: float32")
@@ -46,6 +58,8 @@ REGISTER_OP("ThreeInterpolateGrad")
         c->set_output(0, c->input(0));
         return Status::OK();
     });
+
+void threennGPULauncher(int b, int n, int m, const float *xyz1, const float *xyz2, float *dist, int *idx);
 
 // Find three nearest neigbors with square distance
 // input: xyz1 (b,n,3), xyz2(b,m,3)
@@ -179,6 +193,38 @@ class ThreeNNOp : public OpKernel {
 };
 REGISTER_KERNEL_BUILDER(Name("ThreeNN").Device(DEVICE_CPU), ThreeNNOp);
 
+
+class ThreeNNGPUOp : public OpKernel {
+    public:
+        explicit ThreeNNGPUOp(OpKernelConstruction* context) : OpKernel(context) {}
+
+        void Compute(OpKernelContext* context) override {
+            const Tensor& xyz1_tensor = context->input(0);
+            OP_REQUIRES(context, xyz1_tensor.dims()==3 && xyz1_tensor.shape().dim_size(2)==3, errors::InvalidArgument("ThreeNN expects (b,n,3) xyz1 shape."));
+            int b = xyz1_tensor.shape().dim_size(0);
+            int n = xyz1_tensor.shape().dim_size(1);
+
+            const Tensor& xyz2_tensor = context->input(1);
+            OP_REQUIRES(context, xyz2_tensor.dims()==3 && xyz2_tensor.shape().dim_size(2)==3, errors::InvalidArgument("ThreeNN expects (b,m,3) xyz2 shape."));
+            int m = xyz2_tensor.shape().dim_size(1);
+
+            Tensor *dist_tensor = nullptr;
+            OP_REQUIRES_OK(context, context->allocate_output(0, TensorShape{b,n,3}, &dist_tensor));
+            Tensor *idx_tensor = nullptr;
+            OP_REQUIRES_OK(context, context->allocate_output(1, TensorShape{b,n,3}, &idx_tensor));
+
+            auto xyz1_flat = xyz1_tensor.flat<float>();
+            const float *xyz1 = &(xyz1_flat(0));
+            auto xyz2_flat = xyz2_tensor.flat<float>();
+            const float *xyz2 = &(xyz2_flat(0));
+            auto dist_flat = dist_tensor->flat<float>();
+            float *dist = &(dist_flat(0));
+            auto idx_flat = idx_tensor->flat<int>();
+            int *idx = &(idx_flat(0));
+            threennGPULauncher(b,n,m,xyz1,xyz2,dist,idx);
+        }
+};
+REGISTER_KERNEL_BUILDER(Name("ThreeNNGPU").Device(DEVICE_GPU), ThreeNNGPUOp);
 
 
 class ThreeInterpolateOp: public OpKernel{
