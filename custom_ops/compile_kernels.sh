@@ -12,7 +12,7 @@ while read -r dir; do
     source ./compile.sh
     popd
 done << EOF
-./sampling/
 ./interpolation/
-./grouping
 EOF
+#./sampling/
+#./grouping
