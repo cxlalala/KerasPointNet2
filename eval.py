@@ -30,19 +30,9 @@ output_file = os.path.join(output_dir, "{}_output.h5".format("13296"))
 def gen():
     return yield_sampled_chunks(top_dir, bottom_dir, left_dir, right_dir, 20, 2048, 18000.0)
 
-point_dataset = tf.data.Dataset.from_generator(gen, np.float32, (2048, 3))
-point_dataset = point_dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
-point_dataset = point_dataset.map(lambda data: tf.expand_dims(data, axis=0))
-
 with h5py.File(output_file, 'w') as output_file:
-    predictions = model.predict_generator(point_dataset, verbose=1)
-    predictions_sparse = np.argmax(predictions, axis=2)
     data = np.array(list(gen()))
+    predictions = model.predict(data)
+    predictions_sparse = np.argmax(predictions, axis=2)
     output_file.create_dataset("data", data=data)
     output_file.create_dataset("prediction", data=predictions_sparse)
-
-#for batch in chunks:
-#    print(batch.shape)
-#    batch = np.expand_dims(batch, axis=0)
-#    print(batch.shape)
-#    predictions = model.predict_on_batch(batch)
