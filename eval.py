@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import sys
 
 try:
@@ -30,6 +29,7 @@ output_file = os.path.join(output_dir, "{}_output.h5".format("13296"))
 def gen():
     return yield_sampled_chunks(top_dir, bottom_dir, left_dir, right_dir, 20, 2048, 18000.0)
 
+print("Evaluating...")
 with h5py.File(output_file, 'w') as output_file:
     data = np.array(list(gen()))
     predictions = model.predict(data)
