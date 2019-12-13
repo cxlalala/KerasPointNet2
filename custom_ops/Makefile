@@ -1,4 +1,4 @@
-TF_FLAGS := $(shell python3 -c 'import tensorflow as tf;print(" ".join(tf.sysconfig.get_compile_flags()) + " " + " ".join(tf.sysconfig.get_link_flags()))')
+TF_FLAGS := $(shell python -c 'import tensorflow as tf;print(" ".join(tf.sysconfig.get_compile_flags()) + " " + " ".join(tf.sysconfig.get_link_flags()))')
 CUDA_LINK := -lcudart -L /usr/local/cuda-10.0/lib64/
 CUDA_INCLUDE := -I /usr/local/cuda-10.0/include
 CUDA_NVCC := /usr/local/cuda-10.0/bin/nvcc

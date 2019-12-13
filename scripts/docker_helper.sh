@@ -15,7 +15,7 @@ function train_net() {
         -v $dataset_path:/data\
         $docker_default_args\
         python ./train.py /data/ $trainer_args
-}
+    }
 
 function eval_net() {
     board_id="$1"
@@ -29,4 +29,12 @@ function eval_net() {
         /data/$board_id.Geo-{Top,Bottom,Left,Right}.ltiDepthMapStream\
         /out\
         $model_dir
+    }
+
+function compile_net_ops() {
+    docker run $docker_default_args bash -c "
+    pushd custom_ops/
+    make -j
+    popd
+    "
 }
