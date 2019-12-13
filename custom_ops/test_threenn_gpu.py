@@ -3,7 +3,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 
 import numpy as np
-from interpolation.interpolation import three_nn, three_nn_gpu
+from interpolation import three_nn, three_nn_gpu
 
 inp1 = np.random.random((3, 2048, 3))
 inp2 = np.random.random((3, 512, 3))

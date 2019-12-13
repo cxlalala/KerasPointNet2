@@ -1,8 +1,8 @@
 import sys
 import tensorflow as tf
-from custom_ops.grouping.grouping import *
-from custom_ops.sampling.sampling import *
-from custom_ops.interpolation.interpolation import *
+from custom_ops.grouping import *
+from custom_ops.sampling import *
+from custom_ops.interpolation import *
 
 
 def sample_and_group(npoint, radius, nsample, xyz, points):
