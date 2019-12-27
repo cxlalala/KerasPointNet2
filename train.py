@@ -75,9 +75,9 @@ tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, profile_b
 # Fit the model
 model.fit_generator(
     train_dataset,
-    steps_per_epoch=train_dataset_len // args.dataset_subset,
+    steps_per_epoch=(train_dataset_len // args.batch_size) // args.dataset_subset,
     validation_data=test_dataset,
-    validation_steps=test_dataset_len // args.dataset_subset,
+    validation_steps=(test_dataset_len // args.batch_size) // args.dataset_subset,
     validation_freq=1,
     epochs=args.n_epochs,
     callbacks=[checkpoint_callback, tensorboard_callback])

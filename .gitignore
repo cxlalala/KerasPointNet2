@@ -2,3 +2,4 @@
 tf_ckpts/
 saved_model/
 logs/
+old_checkpoints
